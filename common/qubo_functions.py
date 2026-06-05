@@ -1,25 +1,3 @@
-"""
-solve_qubo_sa.py
-
-このスクリプトは、QUBO（Quadratic Unconstrained Binary Optimization）問題を解くためのツールを提供します。
-主に以下の3つの機能を実装しています：
-
-1. QUBO係数の生成:
-   - 与えられた到達可能性データ（reach）を基に、QUBOの線形係数（b）、二次係数（Q）、定数項（const）を生成します。
-   - k重被覆やコストの重み付けなど、柔軟な設定が可能です。
-
-2. QUBOの簡易ソルバ:
-   - 焼きなまし法（Simulated Annealing）と局所探索を組み合わせたアルゴリズムで、QUBO問題を解きます。
-   - ランダム初期化や温度スケジュールを用いて、最適解を探索します。
-
-3. 被覆の検証と冗長除去:
-   - ビットマスクを用いて、与えられた選択肢が全体をカバーしているかを検証します。
-   - 冗長な選択肢を削除し、最小限の選択肢でカバーを維持する機能を提供します。
-
-このスクリプトは、組合せ最適化問題やネットワーク設計問題など、幅広い応用に利用できます。
-"""
-
-
 from typing import List, Set, Dict, Tuple, Optional
 from collections import defaultdict
 import math, random
@@ -219,34 +197,3 @@ def prune_redundant(S: List[int], chosen: Set[int]) -> Set[int]:
                 changed = True
     return chosen
 
-# =========================
-# 4) 使い方デモ
-# =========================
-if __name__ == "__main__":
-    # ---- サンプル reach（親 i -> 到達できる子 j）----
-    # 実務では 1ホップ / Nホップから作った reach をここに渡してください。
-    reach = [
-        {0,1,2},      # 親0
-        {2,3,4},      # 親1
-        {4,5},        # 親2
-        {1,5,6,7},    # 親3
-        {0,6},        # 親4
-        {3,7},        # 親5
-    ]
-    # QUBO 係数生成（k=1、未被覆を強く罰するため A を大きめに）
-    b, Q, const, N = qubo_from_reach(reach, lam=1.0, A=30.0, k=1, include_self=True)
-
-    # QUBO を焼きなまし＋局所探索で最小化（近似）
-    x, energy = solve_qubo_sa(b, Q, const, n=N, restarts=30, sweeps=3000, T0=1.5, T_end=1e-4, seed=42)
-
-    chosen = {i for i, xi in enumerate(x) if xi == 1}
-    print("QUBO raw solution parents:", sorted(chosen), " (count:", len(chosen), ")")
-
-    # 被覆を検証 & 冗長除去（任意：解を引き締める）
-    S = sets_to_bitmasks(reach, include_self=True)
-    ok = verify_cover(S, chosen)
-    print("cover check (before prune):", ok)
-    chosen = prune_redundant(S, chosen)
-    ok = verify_cover(S, chosen)
-    print("cover check (after prune):", ok)
-    print("pruned parents:", sorted(chosen), " (count:", len(chosen), ")")

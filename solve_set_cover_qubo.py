@@ -1,7 +1,7 @@
 import sys
 from typing import List, Set
-from solve_qubo_sa import qubo_from_reach, solve_qubo_sa, sets_to_bitmasks, verify_cover, prune_redundant
-from solve_set_cover_bruteforce import generate_cover_sets
+from common.qubo_functions import qubo_from_reach, solve_qubo_sa, sets_to_bitmasks, verify_cover, prune_redundant
+from common.functions import generate_cover_sets
 
 def bitmasks_to_sets(bitmasks: List[int], m: int, n: int) -> List[Set[int]]:
     """
